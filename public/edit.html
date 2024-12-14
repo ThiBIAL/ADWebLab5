@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit User</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Edit User</h1>
+    <form id="editUserForm">
+        <input type="hidden" id="userId">
+        <input type="text" id="editName" placeholder="Name" required>
+        <input type="email" id="editEmail" placeholder="Email" required>
+        <button type="submit">Save Changes</button>
+    </form>
+    
+    <a href="/">Back to Menu</a>
+    <script>
+        const apiUrl = 'http://localhost:3000';
+        const editUserForm = document.getElementById('editUserForm');
+        const userId = document.getElementById('userId');
+        const editName = document.getElementById('editName');
+        const editEmail = document.getElementById('editEmail');
+
+        async function loadUser(id) {
+            try {
+                const response = await fetch(`${apiUrl}/users/${id}`);
+                const user = await response.json();
+                userId.value = user.id;
+                editName.value = user.name;
+                editEmail.value = user.email;
+            } catch (error) {
+                console.error('Error loading user:', error);
+            }
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+        if (id) {
+            loadUser(id);
+        }
+
+        editUserForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = userId.value;
+            const name = editName.value;
+            const email = editEmail.value;
+
+            try {
+                const response = await fetch(`${apiUrl}/users/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email })
+                });
+
+                if (response.ok) {
+                    alert('User updated successfully');
+                    window.location.href = '/';
+                } else {
+                    const errorData = await response.json();
+                    alert(`Failed to update user: ${errorData.message}`);
+                }
+            } catch (error) {
+                console.error('Error updating user:', error);
+            }
+        });
+    </script>
+</body>
+</html>
